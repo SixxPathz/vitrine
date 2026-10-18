@@ -57,13 +57,10 @@ Fork the repo, enable Actions, run **Build IPA from your own Spotify IPA**. It t
 your decrypted `.ipa` and hands the built IPA back as a workflow artifact. No Mac needed; the link is
 masked in the log and the result stays in your fork.
 
-No link? Upload the `.ipa` from your PC instead. With the [GitHub CLI](https://cli.github.com) signed in,
-from your fork's clone on Windows:
-
-    .\scripts\upload-ipa.ps1 C:\path\to\Spotify.ipa
-
-It puts the IPA on a draft release named `ipa-input`, which only you can see, then runs the workflow with the
-link left empty and waits for the build.
+No link? Upload the `.ipa` from your PC: on your fork's **Releases** page, edit the draft named
+**IPA input (private draft)** (tag `ipa-input`; create it as a draft if it isn't there), drag the `.ipa` into
+its attachments box and click **Save draft**. Then run the workflow with the link field empty. The newest
+`.ipa` on the draft is built, and a draft is hidden from everyone but you.
 
 ### Build on a Mac
 

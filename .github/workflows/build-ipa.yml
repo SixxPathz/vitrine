@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       ipa_url:
-        description: "Direct link to a decrypted Spotify IPA (leave empty to use the one scripts/upload-ipa.ps1 uploaded)"
+        description: "Direct link to a decrypted Spotify IPA (leave empty to use the newest .ipa on the IPA input draft release)"
         required: false
         default: ""
         type: string
@@ -43,8 +43,9 @@ jobs:
           brew install make dpkg ldid
           python3 -m pip install --break-system-packages git+https://github.com/asdfzxcvbn/pyzule-rw.git
 
-      # Without a link, the IPA comes from the ipa-input draft release that scripts/upload-ipa.ps1 fills from
-      # your PC. A draft stays hidden from everyone but you, even in a public fork.
+      # Without a link, the IPA is the newest .ipa attached in the browser to the draft release tagged ipa-input.
+      # A draft stays hidden from everyone but you, even in a public fork. gh release can't find a draft by its
+      # tag, so the release list is searched instead.
       - name: Download IPA
         env:
           IPA_URL: ${{ inputs.ipa_url }}
@@ -54,8 +55,9 @@ jobs:
           if [ -n "$IPA_URL" ]; then
             curl -fsSL "$IPA_URL" -o ipa/spotify.ipa
           else
-            gh release download ipa-input --repo "$GITHUB_REPOSITORY" --pattern '*.ipa' --output ipa/spotify.ipa \
-              || { echo "::error::No ipa_url given and no .ipa on the ipa-input draft release. Upload one with scripts/upload-ipa.ps1."; exit 1; }
+            ASSET=$(gh api "repos/$GITHUB_REPOSITORY/releases" --jq '[.[] | select(.tag_name == "ipa-input") | .assets[] | select(.name | endswith(".ipa"))] | sort_by(.updated_at) | last | .url // empty')
+            [ -n "$ASSET" ] || { echo "::error::No link given and no .ipa attached to the ipa-input draft release"; exit 1; }
+            curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" "$ASSET" -o ipa/spotify.ipa
           fi
           case "$(file --mime-type -b ipa/spotify.ipa)" in application/zip|application/x-ios-app) ;; *) echo "::error::Not an IPA"; exit 1 ;; esac
 
