@@ -57,6 +57,14 @@ Fork the repo, enable Actions, run **Build IPA from your own Spotify IPA**. It t
 your decrypted `.ipa` and hands the built IPA back as a workflow artifact. No Mac needed; the link is
 masked in the log and the result stays in your fork.
 
+No link? Upload the `.ipa` from your PC instead. With the [GitHub CLI](https://cli.github.com) signed in,
+from your fork's clone on Windows:
+
+    .\scripts\upload-ipa.ps1 C:\path\to\Spotify.ipa
+
+It puts the IPA on a draft release named `ipa-input`, which only you can see, then runs the workflow with the
+link left empty and waits for the build.
+
 ### Build on a Mac
 
 Theos in `~/theos` and Xcode with an iPhoneOS 26+ SDK (`xcode-select` it). An SDK in `~/theos/sdks`
